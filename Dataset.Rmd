@@ -1,0 +1,52 @@
+---
+title: "Project"
+output: html_document
+date: "2023-04-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+install.packages('causaldata')
+```
+
+```{r}
+library(causaldata)
+```
+
+```{r}
+nsw_data = nsw_mixtape
+head(nsw_data)
+```
+
+```{r}
+nsw_data['earning_log'] = log(nsw_data$re78 + 1)
+
+mod1 <- lm(re78 ~ treat + age + educ + black + hisp + marr + nodegree, data=nsw_data)
+summary(mod1)
+```
+```{r}
+mod2 <- lm(earning_log ~ treat + age + educ + black + hisp + marr + nodegree, data=nsw_data)
+summary(mod2)
+```
+
+```{r}
+mod3 <- lm(re78 ~ treat, data=nsw_data)
+summary(mod3)
+```
+
+```{r}
+# subgroup <- nsw_data[nsw_data$nodegree==0,]
+subgroup <- nsw_data[nsw_data$black==1,]
+
+mod4 <- lm(re78 ~ treat + age + educ + black + hisp + marr + nodegree, data=subgroup)
+summary(mod4)
+```
+
+```{r}
+write.csv(nsw_data,'NSW_data.csv')
+```
+
