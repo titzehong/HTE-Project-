@@ -104,7 +104,7 @@ To achieve both aims, a bayesian non-parametric regression model built on the Ew
 \\ \\ 
 \section{Related Work}
 
-The EPA regression model is based off (Dahl), and we apply it to the problem of heterogenous treatment effect. In their work, they showed that the model is able to do latent subgroup regression... and is able to outperform ... . This motivates the use of EPA regression over similar partition distributions. 
+The EPA regression model is based off the work in \cite{dahl2017random} and \cite{glynn2021inflection}, and we apply it to the problem of heterogenous treatment effect. In their work, they showed that the model is able to do latent subgroup regression... and is able to outperform ... . This motivates the use of EPA regression over similar partition distributions. 
 
 Another similar application of EPA regression is in glynn, which applies the EPA regression model to modelling homeless rates across various continum of care. Here the authors posit that CoCs are likely to be similar to each other.., motivating the use of EPA regression. A key difference however is that the work does not aim to find a causal effect, likely due to the fact that their data is largely observational. 
 
@@ -216,16 +216,16 @@ In this work, we have explored the use of the Log Gaussian Cox Process to build 
 \appendix
 
 \section{Simulated Data Plots}
-
+This section contains plots related to the simulated the simulated dataset.
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\textwidth]{Plots/NSW_output_histogram.png}
-  \caption{This is a caption for the image.}
+  \includegraphics[width=1\textwidth]{Plots/simulated_data_info.png}
+  \caption{Various plots of the simulated dataset. Top Row: Histogram of true ITES and scatter plots of true ITEs vs X. Midlde Row: iHstogram of true ITES and scatter plots of true ITEs colored by true latent cluster index. Bottom Row: Histogram of observed outcomes and scatter plots of observed outcomes colored by true latent cluster index.}
   \label{fig:sim_data_info}
 \end{figure}
 
 \section{Simulated Data Results}
-
+This section contains plots related to the model outputs from analysising the simulated dataset.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/Simulated Posterior Similarity Matrix.png}
@@ -256,7 +256,7 @@ In this work, we have explored the use of the Log Gaussian Cox Process to build 
 
 
 \section{NSW Data Results}
-
+This section contains plots related to the model outputs from analysising the NSW dataset.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/NSW Posterior Similarity Matrix.png}
