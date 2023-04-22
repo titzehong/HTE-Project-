@@ -228,7 +228,7 @@ In this work, we have explored the use of the Log Gaussian Cox Process to build 
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{Plots/NSW Posterior Similarity Matrix.png}
+  \includegraphics[width=0.8\textwidth]{Plots/Simulated Posterior Similarity Matrix.png}
   \caption{Posterior similarity matrix inferred from simulated data}
   \label{fig:sim_post_mat}
 \end{figure}
@@ -236,27 +236,57 @@ In this work, we have explored the use of the Log Gaussian Cox Process to build 
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{Plots/simuated_diagnostics.png}
-  \caption{Various regression diagnostic plots. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
+  \caption{Various regression diagnostic plots for model on simulated data. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
   \label{fig:sim_diag_plots}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{Plots/Simulated_output_scatted.png}
-  \caption{Scater plots}
+  \caption{Scatter plots of estimated individual treatment effects for model on simulated data. Left: Estimated individual treatment effect against X, colored by estimated cluster index. Right: Plot of $\hat{E}[Y(1)]$ against $\hat{E}[Y(0)]$}
   \label{fig:sim_scatter_plots}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/Simulated_output_histogram.png}
-  \caption{Simulated Data Histo}
+  \caption{KDE plots of estimated ITEs by cluster indexes. For model on simulated data}
   \label{fig:sim_histo}
 \end{figure}
 
 
-
 \section{NSW Data Results}
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Plots/NSW Posterior Similarity Matrix.png}
+  \caption{Posterior similarity matrix inferred from NSW data}
+  \label{fig:nsw_post_mat}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{Plots/NSW_diagnostics.png}
+  \caption{Various regression diagnostic plots for model on NSW data. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
+  \label{fig:nsw_diag_plots}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{Plots/NSW_output_scatted.png}
+  \caption{Scatter plots of estimated individual treatment effects for model on NSW data. Left: Estimated individual treatment effect against X, colored by estimated cluster index. Right: Plot of $\hat{E}[Y(1)]$ against $\hat{E}[Y(0)]$}
+  \label{fig:nsw_scatter_plots}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Plots/NSW_output_histogram.png}
+  \caption{KDE plots of estimated ITEs by cluster indexes. For model on NSW data}
+  \label{fig:nsw_histo}
+\end{figure}
+
+
 
 \printbibliography
 
