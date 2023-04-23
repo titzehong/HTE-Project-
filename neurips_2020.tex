@@ -34,6 +34,20 @@
 \usepackage{subcaption}
 \usepackage[]{graphicx}
 
+\usepackage{physics, amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{bbold}
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\usepackage{diagbox}
+\graphicspath{ {./} }
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{bm}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{booktabs} 
+\usepackage{multirow}
+\usepackage{makecell}
 
 \addbibresource{citations.bib}
 
@@ -94,7 +108,7 @@
 
 \section{Introduction}
 
-One goal of heterogeneous treatment effect (HTE) analysis is to examine if a treatment affects an individual or population subgroup more then others. Identifying such treatment effect heterogeneity is crucial since average or marginal treatment effects may mask the effect of a policy. For example, a subgroup may have a negative treat effect to a medicine whereas the ATE might be positive, it is thus crucial that methods be available to identify such groups. 
+One goal of heterogeneous treatment effect (HTE) analysis is to examine if a treatment affects an individual or population subgroup more then others. Identifying such treatment effect heterogeneity is crucial since average or marginal treatment effects may mask the effect of a policy. For example, a subgroup may have a negative treatmeant effect to a medicine whereas the ATE might be positive, it is thus crucial that methods be available to identify such groups. 
 \\ \\
 The typical approach to HTE analysis is through the use of subgroup analysis. Subgroups are partitions of the covariate space, and are typically pre-specified based on domain knowledge. For example we might specify a males vs females subgroup, and compare difference in treatment effect between the groups. This provides the first motivation for the application of bayesian non-parametric modelling, that such subgroups can be inferred from the data instead of being pre-specified. This is important for several reasons, firstly domain expertise might not be available to specify the subgroups, secondly even with domain expertise a cluster analysis can often times still provide valuable insights into the data, lastly cluster analysis can be useful in finding subgroups in higher dimensions.
 \\ \\ 
@@ -104,11 +118,9 @@ To achieve both aims, a bayesian non-parametric regression model built on the Ew
 \\ \\ 
 \section{Related Work}
 
-The EPA regression model is based off the work in \cite{dahl2017random} and \cite{glynn2021inflection}, and we apply it to the problem of heterogenous treatment effect. In their work, they showed that the model is able to do latent subgroup regression... and is able to outperform ... . This motivates the use of EPA regression over similar partition distributions. 
+The EPA distribution is introduced in \cite{dahl2017random} as a distribution over partitions with pairwise similarity information. Here the author demonstrates its use in unsupervised non-parametric clustering models as well as in a non-parametric regression setting. EPA regression is applied to the model of homeless rates across different spatial locations in \cite{glynn2021inflection}, here the authors focus is on analysing the regression surface, to find inflection points relating covariates to homeless rates. Their use of EPA regression is motivated by the hypothesis that these spatial locations are likely to be similar to each other.  A key difference however is that the work does not aim to find a causal effect.
 
-Another similar application of EPA regression is in glynn, which applies the EPA regression model to modelling homeless rates across various continum of care. Here the authors posit that CoCs are likely to be similar to each other.., motivating the use of EPA regression. A key difference however is that the work does not aim to find a causal effect, likely due to the fact that their data is largely observational. 
-
-Lastly, the work of causal clustering in [], also seeks to discover latent subgroups in the data. The approach however is different. With causal clustering the author first uses an outocme model to estimate the vector of potential outcomes. These estimated potential outcomes are passed into a clustering algorithm like K-means or hierarchical clustering in order to find clusters of data points in the potential outcome space. These clusters, if they exist are likely to have differing levels treatment effect. Our work is different in that we exploit the EPA regression model's ability to model and cluster jointly, bypassing the need to fit outcome and clustering model separately. 
+Lastly, the work of causal clustering in \ref{kim2020causal}, also seeks to discover latent subgroups in the data with heterogenous treatment effects. The approach however is different. With causal clustering the author first uses an outocme model to estimate the vector of potential outcomes. These estimated potential outcomes are passed into a clustering algorithm like K-means or hierarchical clustering in order to find clusters of data points in the potential outcome space. These clusters, if they exist are likely to have differing levels treatment effect. Our work is different in that we exploit the EPA regression model's ability to model and cluster jointly, bypassing the need to fit outcome and clustering model separately. 
 
 \section{Model}
 \label{sec:Model}
@@ -127,31 +139,65 @@ Under the assumptions, CATE can be identified as:
 $$E[Y(1)-Y(0)|X] = E[Y|D=1] - E[Y|D=0]$$ 
 \\ 
 Thus the modelling approach is to specify models for $E[Y|D=1]$ and $E[Y|D=0]$. For this work, we take the S-learner approach, where a single model $Y=f(D,X)$ is specified and we take $f(1,X) = E[Y|D=1]$ and $f(0,X) = E[Y|D=0]$. The estimator for CATE is then:
-$$\hat{CATE(X)} = f(1,X) - f(0,X)$$ 
+$$\widehat{CATE(X)} = f(1,X) - f(0,X)$$ 
 where $f$ is the EPA regression model.
 
 \paragraph{EPA Distribution}
-The EPA distribution is a distribution over partitions indexed by a pairwise similarity function. That is, suppose we have points $X_1,...,X_n$ and a similarity function $\lambda(X_i,X_j)$. Denote $s={s_1,...,s_n}$ a partition of the dataset. The EPA distribution can be written as a product of pairwise probabilities. 
+
+The EPA distribution is a distribution over partitions indexed by a pairwise similarity function, a mass parameter $\alpha$ and a discount parameter $\delta$. That is, suppose we have points $X_1,...,X_n$ and a similarity function $\lambda(X_i,X_j)$. Denote $\pi_t$ as partition of the dataset of the first $t$ data points. The distribution is then given by:
 
 \begin{equation}
 \label{eqn:EPA Distribution}
-P(\pi_1) = ..
-\end{equation}
-\\ Where each $P_i(t) is given by.$
-\begin{equation}
-\label{eqn:EPA Distribution}
-P(\pi_1) = ..
+P(\pi_n| \alpha, \delta, \lambda, \sigma) = \prod_{t=1}^n P_t(\alpha, \sigma, \lambda, \pi(\sigma_1,...,\sigma_{t-1}))
 \end{equation}
 
+Where each $P_(t)$ is given by.
+
+\begin{equation}
+\begin{align*}
+    P_t(\alpha, \sigma, \lambda, \pi(\sigma_1,...,\sigma_{t-1})) &= P(\sigma_t \in S|\alpha, \delta,\lambda, \pi(\delta_1,...,\delta_{t-1}) \\
+    &=\begin{cases}
+    \frac{t-1-\delta q_{t-1}}{\alpha + t-1}\frac{\sum_{\sigma_s \in S}\lambda(\sigma_t,\sigma_s)}{\sum_{s=1}^{t-1}\lambda(\sigma_t,\sigma_s)}, & \text{if } S \in \pi(\sigma_1,...,\sigma_{t-1}) \\
+     \frac{\alpha + \delta q_{t-1}}{\alpha+t-1}, & \text{if \emph{S} in a new subset}
+    \end{cases} 
+\end{align*}
+\end{equation}
+
+Where $q_{t-1}$ is the number of clusters in the $t-1$ partition. $\sigma_i$ refers to the ordering of the data, which is not necessarily the same as the order in the dataset. That is the model is not exchangeable, this is an important fact that has to be accounted for when doing gibbs sampling. Looking at the equation, we can see that the EPA distribution allocates items sequentially, with probabilities proportion to the total similarity between an item and items currently allocated in a cluster, at the same time, there is also a chance that the distribution allocates the item to a new cluster, which is more likely if the similarities to existing clusters are small.
+\\ \\
+The similarity function we use is the exponential similarity function, given by:
+\begin{equation}
+    \lambda(X_{\lambda_s}, X_{\lambda_t}) = \text{exp}\{-\tau \lVert X_{\lambda_s} - X_{\lambda_t} \rVert  \}
+\end{equation}
+Which is similar to the popular radial basis function but paramatized by a precision term $\tau$ instead of the usual $\frac{1}{2\sigma^2}$. We take $\tau$ to be a hyperparameter, but it can generally be taken as a parameter to be inferred as well.
+    
 \paragraph{Outcome Model}
+The modelling approach is a non-parametric regression model for the observations $Y_i$ given the treatment assignments $D_i$ and covariates (or possibly confounders) $X_i$. To this end we specify the regression likelihood. Each observation $Y_i$ is modelled as a linear function of $D_i$, $X_i$ and possible interaction effects. That is:
+\begin{equation}
+    Y_i = \phi_{0i} + \phi_{1i}D_i + \phi_{2i}X_i + \epsilon
+\label{reg_ll}
+\end{equation}
+Where $\epsilon \sim N(0,\sigma^2)$. Letting $\phi_i$ be the regression coefficient vector for the $i^{th}$ data point, $\phi_i = (\phi_{0i}, \phi_{1i}, \phi_{2i})$, we have that $\phi_i$ is taken as the cluster specific parameter vector, that is, where $Z_i$ is the cluster index of the $i^{th}$ data point:
+\begin{equation}
+    \phi_i = \sum_{k=1}^{q_n} \tilde{\phi_k} \mathbb{1}_{\{Z_i=k}\}
+\end{equation}
+Each $\tilde{\phi_k}$ is drawn independently from a multivariate normal prior, where the prior mean and covariance serve as hyperparameters.
 
 \paragraph{Model Inference} 
-Inference proceeds by way of a Gibbs - Sampler over the parameters $\pi$, $\phi$, $\alpha$, $order$ and $\beta$. For $\pi$ the gibbs sample iterates over each data point. Proposing for each data point a possible move to other existing clusters, or starting a new cluster. This is given by :
-#insert equation
-
-
+Inference proceeds by way of a Gibbs - Sampler over the parameters $\pi$, $\phi$, $\alpha$, $\delta$ and $\beta$. For $\pi$ the Gibbs sampler iterates over each data point, proposing for each data point a possible move to other existing clusters, or starting a new cluster. This is given by :
+\begin{equation}
+    P(i \in S_j^{-i} |.) \propto P(\pi_n^{i \rightarrow j} | \alpha, \delta, \lambda, \sigma)P(Y_i | \tilde{\phi_j})  \quad \text{,for } j=0,1,...,q_n
+\end{equation}
+Where $S_j^{-i}$ refers to $j^{th}$ subset but without point $i$ and $\pi_n^{i \rightarrow j}$ is the partition obtained by moving point $i$ to cluster $S_j^{-i}$.
+\\ \\
+Inference of $\tilde{\phi_k}$ is similar to inference in a hierarchical model with no pooling. That is, each $\tilde{\phi_k}$ is updated only by points allocated to its cluster $k$. With our normal likelihood and normal prior over $\tilde{\phi_k}$ in \ref{reg_ll}, the updates are conditionally conjugate given the partition. That is:
+\begin{equation}
+    \tilde{\phi}_k | \pi_n, \alpha, \delta, \beta, \sigma \sim N(\tilde{\mu}_k, \tilde{\Sigma}_k). 
+\end{equation}
+Where $\tilde{\mu}_k = $ and $\tilde{\Sigma}_k=$.
+\\ \\ 
+We refer readers to \cite{dahl2017random} for details on sampling $\alpha$, $\beta$ and $\sigma$, generally these are sampled using a metropolis in gibbs scheme, where we take a metropolis-hasting step to sample these parameters. For proposal distributions, we generally use random walks. Note that for for $\sigma$ we use a uniform prior and a uniform proposal. 
 \section{Data}
-
 We experiment with two datasets. A simulated dataset as well as the National Supported Work Demonstration (NSW) dataset.
 
 \paragraph{Simulated Dataset} This dataset consists of xx simulated data points from 3 latent regression functions. Index these latent regression functions by 1,2,3 respectively. We firstly generate 1D covariates $X_k$ from Gaussian distributions centered at x x and x with standard deviations x x and x. For each cluster $k$ x points are generated. Then we specify 3 regression functions.
@@ -178,16 +224,14 @@ For the NSW data, we take a further subset of xx individuals who are employed at
 
 \section{Modelling and Results}
 In this section we discuss the modelling details for each dataset as well as the results. 
-\\ \\
+
 \subsection{Modelling Parameters}
 \paragraph{Simulated Data}
 For the simulated dataset, we fit the EPA regression model with a Gaussian likelihood and interaction effects. That is:
-$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i + \beta_{3k}X_iD_i$$
-\\ \\
-We fixed the regression error $\sigma$ as 1. The prior on $\alpha$ is a $Ga(1,10)$ distribution, and the prior on $\beta$ is a mixture of a point mass at 0 and a $\beta(1,1)$ distribution, with each mixture component having an identical weight of 0.5. The prior on $\phi$ is a multivariate normal with 0 mean and an identity matrix as the covariance.  For this model we generated a total of 10000 gibbs sample, with 5000 being discarded as burn-in. 
+$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i + \beta_{3k}X_iD_i$$ We fixed the regression error $\sigma$ as 1. The prior on $\alpha$ is a $Ga(1,10)$ distribution, and the prior on $\beta$ is a mixture of a point mass at 0 and a $\beta(1,1)$ distribution, with each mixture component having an identical weight of 0.5. The prior on $\phi$ is a multivariate normal with 0 mean and an identity matrix as the covariance.  For this model we generated a total of 10000 gibbs sample, with 5000 being discarded as burn-in. 
 
 \paragraph{NSW Data} For the NSW data, we fit EPA regression model with a Gaussian likelihood but without interaction effects. That is:
-$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i$$, where $X_i$ is a vector of covariates. We remove interaction effects as we find it results in too many parameters, leading to poor fit of the model. Further we transform the outcome $Y$ by analysing in 1000s that is dividing $Y$ by 1000. This is to avoid having to set large prior values for $\phi$ parameters.
+$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i$$ where $X_i$ is a vector of covariates. We remove interaction effects as we find it results in too many parameters, leading to poor fit of the model. Further we transform the outcome $Y$ by analysing in 1000s that is dividing $Y$ by 1000. This is to avoid having to set large prior values for $\phi$ parameters.
 \\ \\
 Prior distributions on $\alpha$ and $\beta$ is identical to that used for the model on the simulated data. For $\phi$ we use a zero-mean Gaussian distribution, with a diagonal covariance matrix. This covariance has 1s in all diagonal elements except for the intercept term and the treatment treat, for which the prior variance are 3 and 2 respectively. For this model we generated a total of 15000 gibbs sample, with 5000 being discarded as burn-in. 
 
@@ -198,9 +242,9 @@ For the simulated data, we know the underlying latent clusters and associated re
 \\ \\
 Using this approach, we find that (unsurprisingly) a 3 cluster solution is the most reasonable, that is 4,5 and 6 cluster solutions produced singleton clusters. Further looking at the posterior partition samples, we found that the average number of unique partitions is also 3. 
 \\ \\
-Fig X plots the obtained cluster solutions over the $Y^{obs}$ vs $X$ scatter plot. We see that the results almost perfectly match the true latent clustering, indicating the model is able to detect the latent clusters corresponding to the heterogeneous treatment effects. 
+Fig  plots the obtained cluster solutions over the $Y^{obs}$ vs $X$ scatter plot. We see that the results almost perfectly match the true latent clustering, indicating the model is able to detect the latent clusters corresponding to the heterogeneous treatment effects. 
 \\ \\
-\paragraph{Predicting Potential Outcomes} We choose not to analyse parameters associated to each cluster due to label switching. Instead we analyse each cluster by looking at the mean predicted treatment effect for that cluster. For this we use the monte carlo samples to estimate for each individual $i$ the potential outcomes $Y_i(1)$ and $Y_i(0)$ as $\hat{f}(1,X)$ and $\hat{f}(0,X)$ respectively. Fig X plots the distribution of the ITEs separated by clusters. ... Analysis.
+\paragraph{Predicting Potential Outcomes} We choose not to analyse parameters associated to each cluster due to label switching. Instead we analyse each cluster by looking at the mean predicted treatment effect for that cluster. For this we use the Monte Carlo samples to estimate for each individual $i$ the potential outcomes $Y_i(1)$ and $Y_i(0)$ as $\hat{f}(1,X)$ and $\hat{f}(0,X)$ respectively. Fig X plots the distribution of the ITEs separated by clusters. ... Analysis.
 
 \subsection{NSW Dataset Results} 
 
@@ -238,6 +282,13 @@ This section contains plots related to the model outputs from analysising the si
   \includegraphics[width=1\textwidth]{Plots/simuated_diagnostics.png}
   \caption{Various regression diagnostic plots for model on simulated data. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
   \label{fig:sim_diag_plots}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{Plots/simulated_cluster_scatter.png}
+  \caption{Left: Histogram of Y Obs colored by posterior cluster groupings. Right: Scatter plot of Y Obs against X colored by posterior cluster groupings.}
+  \label{fig:sim_scatter_plots}
 \end{figure}
 
 \begin{figure}[H]
