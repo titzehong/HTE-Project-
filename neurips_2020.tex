@@ -215,7 +215,7 @@ Y_{i2} = 0.3 * D_{i2} + 0.5*X_{i2} + 0.6*X_{i2}*D_{i2} + \sigma_2
 Y_{i3} = 0.3 * D_{i3} + 0.5*X_{i3} + 0.6*X_{i3}*D_{i3} + \sigma_3
 \end{equation}
 
-Each treated $D_ik$ is generated at random with $P(D_ik) = 0.5$, meaning that treatment in this simulated dataset is randomly assigned. Lastly the values of $Y_{ik}$ are generated based one generated $X_{ik}$ and the randomly assigned $D_{ik}$. A plot of the dataset can be seen in figure xx. 
+Each treated $D_ik$ is generated at random with $P(D_ik) = 0.5$, meaning that treatment in this simulated dataset is randomly assigned. Lastly the values of $Y_{ik}$ are generated based one generated $X_{ik}$ and the randomly assigned $D_{ik}$. A plot of the dataset can be seen in figure \ref{fig:sim_data_info}, which shows histograms and scatter plots of the true treatment effects, the scatter plots of the treatment effects against the covariate $X$, and of histogram and scatter plots of the observed data against the covariate $X$. We can see from these plots the presence of treatment effect heterogeneity as a function of the covariate $X$. 
 
 \paragraph{National Supported Work Demonstration (NSW) Data} The National Supported Work Demonstration job training was a experimental program ran in the 1970s by Manpower Demonstration Research Corp (MRDC). The program involved giving participants temporary employment which was designed to help those lacking basic job skills move into the labor market by giving them work experience. The dataset consists of 405 individuals along with x covariates consisting of demographic information, educational background as well as income levels prior to the program. The outcome we measure is the income level post the program. 
 \\ \\ 
@@ -231,24 +231,28 @@ For the simulated dataset, we fit the EPA regression model with a Gaussian likel
 $$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i + \beta_{3k}X_iD_i$$ We fixed the regression error $\sigma$ as 1. The prior on $\alpha$ is a $Ga(1,10)$ distribution, and the prior on $\beta$ is a mixture of a point mass at 0 and a $\beta(1,1)$ distribution, with each mixture component having an identical weight of 0.5. The prior on $\phi$ is a multivariate normal with 0 mean and an identity matrix as the covariance.  For this model we generated a total of 10000 gibbs sample, with 5000 being discarded as burn-in. 
 
 \paragraph{NSW Data} For the NSW data, we fit EPA regression model with a Gaussian likelihood but without interaction effects. That is:
-$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i$$ where $X_i$ is a vector of covariates. We remove interaction effects as we find it results in too many parameters, leading to poor fit of the model. Further we transform the outcome $Y$ by analysing in 1000s that is dividing $Y$ by 1000. This is to avoid having to set large prior values for $\phi$ parameters.
+$$Y_i = \beta_{0k} + \beta_{1k}D_i + \beta_{2k}X_i$$ where $X_i$ is a vector of covariates. We remove interaction effects as we find it results in too many parameters, leading to poor fit of the model. Further we transform the outcome $Y$ by analysing in 1000s that is dividing $Y$ by 1000. This is to avoid having to set large prior values for $\phi$ parameters. Since the treatment is randomized, we first take a simple difference in mean between treatment and control to estimate the sample average treatment effect, this gives a value of \$1340.84.
 \\ \\
 Prior distributions on $\alpha$ and $\beta$ is identical to that used for the model on the simulated data. For $\phi$ we use a zero-mean Gaussian distribution, with a diagonal covariance matrix. This covariance has 1s in all diagonal elements except for the intercept term and the treatment treat, for which the prior variance are 3 and 2 respectively. For this model we generated a total of 15000 gibbs sample, with 5000 being discarded as burn-in. 
 
 \subsection{Simulated Dataset Results} 
-For the simulated data, we know the underlying latent clusters and associated regression function for each data point. We thus benchmark the model based how close the model estimated clustering is to the ground truth clusters. 
+For the simulated data, we know the underlying latent clusters and associated regression function for each data point. We thus benchmark the model based how close the model estimated clustering is to the ground truth clusters and treatment effects.
+\\ \\
+Firstly, we conduct several regression diagnostics by looking at plots of $Y_{obs}$ vs $\hat{Y}$, and the histogram of residuals and plots of residuals vs $Y_{obs}$, these are shown in figure \ref{fig:sim_diag_plots}. We see no major issues, with the residuals having a symmetrical distribution around 0, and the residuals being homoskedastic over the range of $Y$.
+\paragraph{Obtaining Clusters} One issue to note is that our model outputs Monte Carlo samples of possible partitions. There is thus a need to post-process the set of samples to one coherent cluster assignment. For this we take the approach of \ref{medvedovic2004bayesian} which applies hierarchical clustering to the posterior similarity matrix. We plot the posterior similarity matrix for the simulated data in figure \ref{fig:sim_post_mat}, showing the clear presence of 3 clusters. 
+\\ \\
+Using this approach, we find that (unsurprisingly) a 3 cluster solution is the most reasonable, that is 4,5 and 6 cluster solutions produced singleton clusters. Further looking at the posterior partition samples, we found that the average number of unique partitions is also 3. Figure \ref{fig:sim_scatter_plots} plots the obtained cluster solutions over the $Y^{obs}$ vs $X$ scatter plot. We see that the results almost perfectly match the true latent clustering, indicating the model is able to detect the latent clusters corresponding to the heterogeneous treatment effects. 
 
-\paragraph{Obtaining Clusters} One issue to note is that our model outputs Monte Carlo samples of possible partitions. There is thus a need to post-process the set of samples to one coherent cluster assignment. For this we take the approach of cite which applies hierarchical clustering to the posterior similarity matrix. 
-\\ \\
-Using this approach, we find that (unsurprisingly) a 3 cluster solution is the most reasonable, that is 4,5 and 6 cluster solutions produced singleton clusters. Further looking at the posterior partition samples, we found that the average number of unique partitions is also 3. 
-\\ \\
-Fig  plots the obtained cluster solutions over the $Y^{obs}$ vs $X$ scatter plot. We see that the results almost perfectly match the true latent clustering, indicating the model is able to detect the latent clusters corresponding to the heterogeneous treatment effects. 
-\\ \\
-\paragraph{Predicting Potential Outcomes} We choose not to analyse parameters associated to each cluster due to label switching. Instead we analyse each cluster by looking at the mean predicted treatment effect for that cluster. For this we use the Monte Carlo samples to estimate for each individual $i$ the potential outcomes $Y_i(1)$ and $Y_i(0)$ as $\hat{f}(1,X)$ and $\hat{f}(0,X)$ respectively. Fig X plots the distribution of the ITEs separated by clusters. ... Analysis.
+\paragraph{Predicting Potential Outcomes} We choose not to analyse parameters associated to each cluster due to label switching. Instead we analyse each cluster by looking at the mean predicted treatment effect for that cluster. For this we use the Monte Carlo samples to estimate for each individual $i$ the potential outcomes $Y_i(1)$ and $Y_i(0)$ as $\hat{f}(1,X)$ and $\hat{f}(0,X)$ respectively. Figure \ref{fig:sim_scatter_plots} plots the estimated ITEs against the covariates $X$, as well as the estimates of potential outcome under one treatment arm to the other. We can see here that the treatment effect has a strong linear effect with $X$, similar to that of thettrue effects. Note that these are mean estimates for each ITE, explaining why the scatter is linear in nature (for each cluster). Figure \ref{fig:sim_histo} plots histograms of mean $ITE$ separated by clusters, table \ref{tab:simulated_ITEs} shows the mean of ITEs per cluster compared to that of the true mean ITE, we see that generally the predicted cluster means of ITEs align with that of the true means, however the values of the predicted are consistently smaller, this is likely due the shrinkage effect of the bayesian model, as well as the relatively tight standard normal prior.
 
 \subsection{NSW Dataset Results} 
-
-
+Proceeding with the same cluster aggregation approach as with the simulated data, we find 5 clusters with in the dataset. We intially specified the hierarchical clustering procedure with 8 clusters, but found the 3 out of the 8 had insignificant support, hence we do not anaylse the outcomes for the 10 points contained within those clusters. Figure \ref{fig:nsw_post_mat} plots the posterior similarity matrix. 
+\\ \\
+Figure \ref{fig:nsw_diag_plots} plots the same diagnostics as those done for the simulated data, we can see an overall poorer fit of the model for the NSW data. We can see that generally, the predicted $Y$ match the observed $Y$, with residuals being centered around 0, we do however observe a heavier left tail, and a larger variance of residuals close to when $Y_{obs}$ is near 0. We believe this is due to issue with using the Gaussian likelihood for data which is theoretically bounded below by 0.
+\\ \\
+Figure \ref{fig:nsw_scatter_plots} shows a scatter plot of estimated treatment effects in one arm against the other, overlaid with colors of clustering indices, here deviation from the 45\% line indicates size of the treatment effect. Similar information is shown in figure \ref{fig:nsw_histo}, with shows histograms of mean ITEs for each cluster, and table \ref{tab:nsw_ate_results} shows the point estimates along with the standard deviation. We see the presence of some heterogeneity in treatment effects, with most clusters having mean effect around 0, and several having larger treament effects, such as a cluster of 32 points having ATE of \$660 dollars. Importantly we see that these effects are well below the SATE of \$1340.84. This could imply a degree of over-shrinkage by the Bayesian model, or a strong presence of HTEs. 
+\\ \\
+To look at possible drivers behind the HTE, we look at the distribution of covariates $X$ across the different clusters. This is shown in figure x.  
 
 
 \section{Conclusion}
@@ -270,35 +274,53 @@ This section contains plots related to the simulated the simulated dataset.
 
 \section{Simulated Data Results}
 This section contains plots related to the model outputs from analysising the simulated dataset.
-\begin{figure}[H]
+
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/Simulated Posterior Similarity Matrix.png}
   \caption{Posterior similarity matrix inferred from simulated data}
   \label{fig:sim_post_mat}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=1\textwidth]{Plots/simuated_diagnostics.png}
   \caption{Various regression diagnostic plots for model on simulated data. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
   \label{fig:sim_diag_plots}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=1\textwidth]{Plots/simulated_cluster_scatter.png}
   \caption{Left: Histogram of Y Obs colored by posterior cluster groupings. Right: Scatter plot of Y Obs against X colored by posterior cluster groupings.}
   \label{fig:sim_scatter_plots}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=1\textwidth]{Plots/Simulated_output_scatted.png}
   \caption{Scatter plots of estimated individual treatment effects for model on simulated data. Left: Estimated individual treatment effect against X, colored by estimated cluster index. Right: Plot of $\hat{E}[Y(1)]$ against $\hat{E}[Y(0)]$}
   \label{fig:sim_scatter_plots}
 \end{figure}
 
-\begin{figure}[H]
+\begin{table}[h]
+\centering
+\begin{tabular}{cc}
+\hline
+True Mean ITE & Predicted Mean ITEs \\
+\hline
+1.56 & 1.30 \\
+-3.03 & -2.66 \\
+-4.98 & -3.97 \\
+\hline
+\end{tabular}
+\caption{True and predicted mean ITEs}
+\label{tab:simulated_ITEs}
+\end{table}
+
+
+
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/Simulated_output_histogram.png}
   \caption{KDE plots of estimated ITEs by cluster indexes. For model on simulated data}
@@ -308,33 +330,71 @@ This section contains plots related to the model outputs from analysising the si
 
 \section{NSW Data Results}
 This section contains plots related to the model outputs from analysising the NSW dataset.
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/NSW Posterior Similarity Matrix.png}
   \caption{Posterior similarity matrix inferred from NSW data}
   \label{fig:nsw_post_mat}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=1\textwidth]{Plots/NSW_diagnostics.png}
   \caption{Various regression diagnostic plots for model on NSW data. Left: Y True vs Y Predicted. Middle: Histogram of mean residuals. Right: Scatter plot of mean residual vs Y True}
   \label{fig:nsw_diag_plots}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/NSW_output_scatted.png}
   \caption{Scatter plots of estimated individual treatment effects for model on NSW data. Estimated individual treatment effect against X, colored by estimated cluster index}
   \label{fig:nsw_scatter_plots}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{Plots/NSW_output_histogram.png}
   \caption{KDE plots of estimated ITEs by cluster indexes. For model on NSW data}
   \label{fig:nsw_histo}
 \end{figure}
+
+\begin{table}[H]
+\centering
+\label{tab:cluster_ate}
+\begin{tabular}{c|c c}
+\hline
+\textbf{Estimated Cluster} & \textbf{Cluster ATE} & \textbf{SD Cluster ATE} \\ \hline
+0 & 193.17 & 275.42 \\
+1 & -34.14 & 126.85 \\
+2 & 148.67 & 252.92 \\
+5 & 661.50 & 274.61 \\
+6 & 39.76 & 152.22 \\
+\hline
+\end{tabular}
+\caption{Cluster ATE estimates and standard deviations for estimated clusters}
+\label{tab:nsw_ate_results}
+\end{table}
+
+\begin{table}[H]
+\centering
+\label{tab:clusters}
+\begin{tabular}{c|c|c|c|c|c}
+\hline
+\textbf{Estimated Clusters} & N &\textbf{black} & \textbf{hisp} & \textbf{marr} & \textbf{nodegree} \\ \hline
+0 & 89 & 0.808989 & 0.067416 & 0.146067 & 0.730337 \\
+1 & 97 & 0.783505 & 0.134021 & 0.195876 & 0.845361 \\
+2 & 10 & 0.800000 & 0.200000 & 0.200000 & 0.700000 \\
+5 & 32 & 0.781250 & 0.062500 & 0.125000 & 0.812500 \\
+6 & 70 & 0.771429 & 0.142857 & 0.185714 & 0.714286 \\
+\hline
+All & 298 & 0.788591 & 0.110738 & 0.171141 & 0.771812  \\
+\hline
+\end{tabular}
+\caption{Proportion of black, hisp, marr, and nodegree for each cluster}
+\label{tab:nsw_cluster_covar_discrete}
+\end{table}
+
+
 
 
 \printbibliography
