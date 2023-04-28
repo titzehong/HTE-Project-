@@ -1,4 +1,4 @@
-# HTE-Project-
+# Code for Baeysian Nonparametric Analysis of Heterogeneous Treatment Effect.
 STA 640 HTE Project
 
 # Requirements
